@@ -1,5 +1,11 @@
+import math
+
 import numpy as np
 from collections import namedtuple, deque
+
+
+def normalize(state):
+    return state / np.array([1.5, 1.5, 5, 5, math.pi, 5, 1, 1])
 
 
 def print_state(state):
