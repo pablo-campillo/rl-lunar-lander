@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from copy import deepcopy, copy
 
+from rlll.utils import normalize
+
 
 class DQNAgent:
     def __init__(self, env, dnnetwork, buffer, epsilon=0.1, eps_decay=0.99, batch_size=32):
@@ -26,7 +28,8 @@ class DQNAgent:
         self.sync_eps = []
         self.total_reward = 0
         self.step_count = 0
-        self.state0 = self.env.reset()
+        self.state0, _ = self.env.reset()
+        self.state0 = normalize(self.state0)
 
     ## Tomamos una nueva acción
     def take_step(self, eps, mode='train'):
@@ -39,13 +42,15 @@ class DQNAgent:
             self.step_count += 1
 
         # Realizamos la acción y obtenemos el nuevo estado y la recompensa
-        new_state, reward, done, _ = self.env.step(action)
+        new_state, reward, done, truncated, info = self.env.step(action)
+        new_state = normalize(new_state)
         self.total_reward += reward
         self.buffer.append(self.state0, action, reward, done, new_state)  # guardamos experiencia en el buffer
         self.state0 = new_state.copy()
 
         if done:
-            self.state0 = env.reset()
+            self.state0, info = self.env.reset()
+            self.state0 = normalize(self.state0)
         return done
 
     ## Entrenamiento
@@ -65,7 +70,8 @@ class DQNAgent:
         training = True
         print("Training...")
         while training:
-            self.state0 = self.env.reset()
+            self.state0, info = self.env.reset()
+            self.state0 = normalize(self.state0)
             self.total_reward = 0
             gamedone = False
             while gamedone == False:
