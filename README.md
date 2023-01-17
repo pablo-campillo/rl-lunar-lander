@@ -16,5 +16,10 @@ $ source venv/bin/activate
 
 Install python requirementes:
 ```sh
-$ pip install -f requirements.txt
+$ pip install -r requirements.txt
+```
+
+Install pytorch:
+```sh
+$ conda install pytorch torchvision torchaudio pytorch-cuda=11.6 -c pytorch -c nvidia
 ```

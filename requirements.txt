@@ -1,6 +1,6 @@
 -e .
 pygame==2.1.2
-swing==0.04
+swing==0.0.4
 gym[box2d]
 imageio==2.24.0
 matplotlib==3.6.3
