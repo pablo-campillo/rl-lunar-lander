@@ -175,6 +175,12 @@ class DQNAgent:
         else:
             self.update_loss.append(loss.detach().numpy())
 
+    def save(self, file_path: str):
+        torch.save(self.dnnetwork.state_dict(), file_path)
+
+    def load(self, file_path: str):
+        self.dnnetwork.load_state_dict(torch.load(file_path))
+
     def plot_rewards(self):
         plt.figure(figsize=(12, 8))
         plt.plot(self.training_rewards, label='Rewards')
@@ -184,3 +190,13 @@ class DQNAgent:
         plt.ylabel('Rewards')
         plt.legend(loc="upper left")
         plt.show()
+
+    def get_rewards_json(self):
+        return {
+            'result': [{'step': step, 'reward': value} for step, value in enumerate(self.training_rewards)]
+        }
+
+    def get_mean_rewards_json(self):
+        return {
+            'result': [{'step': step, 'reward': value} for step, value in enumerate(self.mean_training_rewards)]
+        }
