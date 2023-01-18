@@ -1,0 +1,25 @@
+schema: '2.0'
+stages:
+  train:
+    cmd: PYTHONPATH=src python src/rlll/train.py models
+    deps:
+    - path: src/rlll/train.py
+      md5: 3c807e7fe6b977d27a1a5edbf8fb79ce
+      size: 2557
+    params:
+      params.yaml:
+        train.batch_size: 32
+        train.burn_in: 1000
+        train.dnn_sync: 2500
+        train.dnn_update: 1
+        train.epsilon: 1
+        train.epsilon_decay: 0.99
+        train.gamma: 0.99
+        train.lr: 0.001
+        train.max_epi: 50
+        train.mem_size: 100000
+    outs:
+    - path: models
+      md5: b08f701e47d0e9dd75d5ad2885b06423.dir
+      size: 7815
+      nfiles: 1
