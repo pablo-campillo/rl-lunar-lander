@@ -5,7 +5,7 @@ from collections import namedtuple, deque
 
 
 def normalize(state):
-    return state / np.array([1.5, 1.5, 5, 5, math.pi, 5, 1, 1])
+    return (state + np.array([1.5, 1.5, 5, 5, math.pi, 5, 0, 0])) / np.array([3, 3, 10, 10, 2*math.pi, 10, 1, 1])
 
 
 class LunarLanderState:
@@ -25,9 +25,10 @@ class StackDataManager:
 
     def add(self, state):
         if self.stacked_data is None:
-            self.stacked_data = np.stack([state] * self.size)
+            self.stacked_data = np.tile(state, self.size)
         else:
-            self.stacked_data = np.stack([state] + [self.stacked_data[i] for i in range(self.size - 1)])
+            self.stacked_data = np.roll(self.stacked_data, len(state))
+            self.stacked_data[:len(state)] = state
         return self.stacked_data
 
 

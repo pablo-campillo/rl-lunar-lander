@@ -8,12 +8,7 @@ def test_stack_data():
     sdm.add(np.array([1, 2, 3, 4]))
 
     assert np.all(np.equal(sdm.stacked_data,
-                    np.array([
-                        [1, 2, 3, 4],
-                        [1, 2, 3, 4],
-                        [1, 2, 3, 4],
-                        [1, 2, 3, 4],
-                    ])))
+                    np.array([1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4])))
 
     sdm.add(np.array([2, 3, 4, 5]))
 

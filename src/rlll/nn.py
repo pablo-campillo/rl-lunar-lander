@@ -6,21 +6,21 @@ import torch.autograd as autograd
 
 class DQN(tnn.Module):
 
-    def __init__(self, env, learning_rate=1e-3, device='cpu'):
+    def __init__(self, env, input_size, learning_rate=1e-3, device='cpu'):
         super(DQN, self).__init__()
         self.device = device
-        self.n_inputs = env.observation_space.shape[0]
+        self.n_inputs = input_size
         self.n_outputs = env.action_space.n
         self.actions = np.arange(env.action_space.n)
         self.learning_rate = learning_rate
 
         ### Construcción de la red neuronal
         self.model = torch.nn.Sequential(
-            torch.nn.Linear(self.n_inputs, 32, bias=True),
+            torch.nn.Linear(self.n_inputs, 16, bias=True),
             torch.nn.ReLU(),
-            torch.nn.Linear(32, 32, bias=True),
+            torch.nn.Linear(16, 16, bias=True),
             torch.nn.ReLU(),
-            torch.nn.Linear(32, self.n_outputs, bias=True))
+            torch.nn.Linear(16, self.n_outputs, bias=True))
 
         self.optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
 
