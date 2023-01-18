@@ -14,6 +14,7 @@ stages:
     - train.burn_in
     - train.dnn_update
     - train.dnn_sync
+    - train.stack_size
     outs:
       - models
       - eval/train/rewards.json:

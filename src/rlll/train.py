@@ -13,21 +13,23 @@ from rlll.utils import ExperienceReplayBuffer
 
 def train_dqn(model_output_path: str):
     params = yaml.safe_load(open("params.yaml"))["train"]
-    lr = params['lr']                   # Velocidad de aprendizaje
-    mem_size = params['mem_size']       # Máxima capacidad del buffer
-    max_epi = params['max_epi']         # Número máximo de episodios (el agente debe aprender antes de llegar a este valor)
-    epsilon = params['epsilon']         # Valor inicial de epsilon
-    epsilon_decay = params['epsilon']   # Decaimiento de epsilon
-    gamma = params['gamma']             # Valor gamma de la ecuación de Bellman
-    batch_size = params['batch_size']   # Conjunto a coger del buffer para la red neuronal
-    burn_in = params['burn_in']         # Número de episodios iniciales usados para rellenar el buffer antes de entrenar
-    dnn_update = params['dnn_update']   # Frecuencia de actualización de la red neuronal
-    dnn_sync = params['dnn_sync']       # Frecuencia de sincronización de pesos entre la red neuronal y la red objetivo
+    lr = params['lr']                           # Velocidad de aprendizaje
+    mem_size = params['mem_size']               # Máxima capacidad del buffer
+    max_epi = params['max_epi']                 # Número máximo de episodios (el agente debe aprender antes de llegar a este valor)
+    epsilon = params['epsilon']                 # Valor inicial de epsilon
+    epsilon_decay = params['epsilon_decay']     # Decaimiento de epsilon
+    gamma = params['gamma']                     # Valor gamma de la ecuación de Bellman
+    batch_size = params['batch_size']           # Conjunto a coger del buffer para la red neuronal
+    burn_in = params['burn_in']                 # Número de episodios iniciales usados para rellenar el buffer antes de entrenar
+    dnn_update = params['dnn_update']           # Frecuencia de actualización de la red neuronal
+    dnn_sync = params['dnn_sync']               # Frecuencia de sincronización de pesos entre la red neuronal y la red objetivo
+    stack_size = params['stack_size']
+    hidden_size = params['hidden_size']
 
     env = gym.make('LunarLander-v2')
     buffer = ExperienceReplayBuffer(memory_size=mem_size, burn_in=burn_in)
-    dqn = DQN(env, learning_rate=lr)
-    agent = DQNAgent(env, dqn, buffer, epsilon, epsilon_decay, batch_size)
+    dqn = DQN(env, 8*stack_size, hidden_size=hidden_size, learning_rate=lr)
+    agent = DQNAgent(env, dqn, buffer, stack_size, epsilon, epsilon_decay, batch_size)
     agent.train(gamma=gamma, max_episodes=max_epi,
                 batch_size=batch_size, dnn_update_frequency=dnn_update, dnn_sync_frequency=dnn_sync)
 

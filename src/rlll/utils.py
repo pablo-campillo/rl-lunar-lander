@@ -5,7 +5,8 @@ from collections import namedtuple, deque
 
 
 def normalize(state):
-    return (state + np.array([1.5, 1.5, 5, 5, math.pi, 5, 0, 0])) / np.array([3, 3, 10, 10, 2*math.pi, 10, 1, 1])
+    return (state + np.array([1.5, 1.5, 5, 5, math.pi, 5, 0, 0])) / \
+           np.array([3, 3, 10, 10, 2*math.pi, 10, 1, 1])
 
 
 class LunarLanderState:
