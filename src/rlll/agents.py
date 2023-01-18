@@ -45,6 +45,7 @@ class DQNAgent:
         self.update_loss = []
         self.training_rewards = []
         self.mean_training_rewards = []
+        self.accu_total_reward = 0
         self.sync_eps = []
         self.total_reward = 0
         self.step_count = 0
@@ -113,10 +114,15 @@ class DQNAgent:
 
                 if gamedone:
                     episode += 1
+                    self.accu_total_reward += self.total_reward
                     self.training_rewards.append(self.total_reward)  # guardamos las recompensas obtenidas
+                    num_rewards = len(self.training_rewards)
+                    if num_rewards > self.nblock:
+                        self.accu_total_reward -= self.training_rewards[-self.nblock]
                     self.update_loss = []
-                    mean_rewards = np.mean(  # calculamos la media de recompensa de los últimos X episodios
-                        self.training_rewards[-self.nblock:])
+                    # mean_rewards = np.mean(  # calculamos la media de recompensa de los últimos X episodios
+                    #    self.training_rewards[-self.nblock:])
+                    mean_rewards = self.accu_total_reward / min(self.nblock, num_rewards)
                     self.mean_training_rewards.append(mean_rewards)
 
                     print("\rEpisode {:d} Mean Rewards {:.2f} Epsilon {}\t\t".format(
