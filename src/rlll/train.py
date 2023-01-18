@@ -1,3 +1,5 @@
+import json
+
 import gym as gym
 import logging
 from pathlib import Path
@@ -30,6 +32,15 @@ def train_dqn(model_output_path: str):
                 batch_size=batch_size, dnn_update_frequency=dnn_update, dnn_sync_frequency=dnn_sync)
 
     agent.save(model_output_path)
+
+    data = agent.get_rewards_json()
+    with open('eval/train/rewards.json', 'w') as f:
+        f.write(json.dumps(data))
+
+    data = agent.get_mean_rewards_json()
+    with open('eval/train/mean_rewards.json', 'w') as f:
+        f.write(json.dumps(data))
+
 
 
 @click.command()

@@ -1,7 +1,7 @@
 train:
   lr: 0.001
   mem_size: 100000
-  max_epi: 50
+  max_epi: 100
   epsilon: 1
   epsilon_decay: .99
   gamma: 0.99

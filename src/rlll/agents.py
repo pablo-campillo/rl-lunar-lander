@@ -182,3 +182,13 @@ class DQNAgent:
         plt.ylabel('Rewards')
         plt.legend(loc="upper left")
         plt.show()
+
+    def get_rewards_json(self):
+        return {
+            'result': [{'step': step, 'reward': value} for step, value in enumerate(self.training_rewards)]
+        }
+
+    def get_mean_rewards_json(self):
+        return {
+            'result': [{'step': step, 'reward': value} for step, value in enumerate(self.mean_training_rewards)]
+        }

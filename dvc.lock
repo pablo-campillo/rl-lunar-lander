@@ -4,8 +4,8 @@ stages:
     cmd: PYTHONPATH=src python src/rlll/train.py models
     deps:
     - path: src/rlll/train.py
-      md5: 3c807e7fe6b977d27a1a5edbf8fb79ce
-      size: 2557
+      md5: a04c769cb3f711af82df02de13f3b865
+      size: 2827
     params:
       params.yaml:
         train.batch_size: 32
@@ -16,10 +16,16 @@ stages:
         train.epsilon_decay: 0.99
         train.gamma: 0.99
         train.lr: 0.001
-        train.max_epi: 50
+        train.max_epi: 100
         train.mem_size: 100000
     outs:
+    - path: eval/train/mean_rewards.json
+      md5: 313b213b3d67a9325d0ec5e6266510c5
+      size: 4481
+    - path: eval/train/rewards.json
+      md5: d9143140b2073e3732849f04957ffad0
+      size: 4446
     - path: models
-      md5: b08f701e47d0e9dd75d5ad2885b06423.dir
+      md5: 5d0139e7d0e9bd1be295c8ea0e198209.dir
       size: 7815
       nfiles: 1

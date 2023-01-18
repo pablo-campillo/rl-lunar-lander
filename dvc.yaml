@@ -2,7 +2,7 @@ stages:
   train:
     cmd: PYTHONPATH=src python src/rlll/train.py models
     deps:
-    - src/rlll/train.py
+      - src/rlll/train.py
     params:
     - train.lr
     - train.mem_size
@@ -15,4 +15,15 @@ stages:
     - train.dnn_update
     - train.dnn_sync
     outs:
-    - models
+      - models
+      - eval/train/rewards.json:
+          cache: false
+      - eval/train/mean_rewards.json:
+          cache: false
+
+plots:
+  - Training-Rewards:
+      x: step
+      y:
+        eval/train/rewards.json: reward
+        eval/train/mean_rewards.json: reward
