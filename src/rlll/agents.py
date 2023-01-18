@@ -6,7 +6,7 @@ import math
 from abc import ABC, abstractmethod
 import numpy as np
 
-from rlll.utils import normalize
+from rlll.utils import normalize, StackDataManager
 
 
 class Agent(ABC):
@@ -25,12 +25,14 @@ class RandAgent(Agent):
 
 
 class DQNAgent:
-    def __init__(self, env, dnnetwork, buffer, epsilon=0.1, eps_decay=0.99, batch_size=32):
+    def __init__(self, env, dnnetwork, buffer, stack_size, epsilon=0.1, eps_decay=0.99, batch_size=32):
 
         self.env = env
         self.dnnetwork = dnnetwork
         self.target_network = deepcopy(dnnetwork)  # red objetivo (copia de la principal)
         self.buffer = buffer
+        self.stack_size = stack_size
+        self.stacker = StackDataManager(size=stack_size)
         self.epsilon = epsilon
         self.eps_decay = eps_decay
         self.batch_size = batch_size
@@ -48,6 +50,7 @@ class DQNAgent:
         self.step_count = 0
         self.state0, _ = self.env.reset()
         self.state0 = normalize(self.state0)
+        self.state0 = self.stacker.add(self.state0)
 
     ## Tomamos una nueva acción
     def take_step(self, eps, mode='train'):
@@ -62,6 +65,7 @@ class DQNAgent:
         # Realizamos la acción y obtenemos el nuevo estado y la recompensa
         new_state, reward, done, truncated, info = self.env.step(action)
         new_state = normalize(new_state)
+        new_state = self.stacker.add(new_state)
         self.total_reward += reward
         self.buffer.append(self.state0, action, reward, done, new_state)  # guardamos experiencia en el buffer
         self.state0 = new_state.copy()
@@ -69,6 +73,7 @@ class DQNAgent:
         if done:
             self.state0, info = self.env.reset()
             self.state0 = normalize(self.state0)
+            self.state0 = self.stacker.add(self.state0)
         return done
 
     ## Entrenamiento
@@ -90,6 +95,7 @@ class DQNAgent:
         while training:
             self.state0, info = self.env.reset()
             self.state0 = normalize(self.state0)
+            self.state0 = self.stacker.add(self.state0)
             self.total_reward = 0
             gamedone = False
             while gamedone == False:
@@ -131,6 +137,8 @@ class DQNAgent:
 
                     # Actualizamos epsilon según la velocidad de decaimiento fijada
                     self.epsilon = max(self.epsilon * self.eps_decay, 0.01)
+
+                    self.stacker = StackDataManager(size=self.stack_size)
 
     ## Cálculo de la pérdida
     def calculate_loss(self, batch):
