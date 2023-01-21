@@ -1,13 +1,13 @@
 train:
+  max_epi: 1000
   lr: 0.001
   mem_size: 100000
-  max_epi: 1000
+  burn_in: 1000
   epsilon: 1
-  epsilon_decay: .99
+  epsilon_decay: 0.99
   gamma: 0.99
   batch_size: 32
-  burn_in: 1000
   dnn_update: 1
   dnn_sync: 2500
-  stack_size: 3
+  stack_size: 1
   hidden_size: 16

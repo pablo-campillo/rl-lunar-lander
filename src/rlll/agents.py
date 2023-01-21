@@ -1,10 +1,10 @@
-import torch
-import numpy as np
-import matplotlib.pyplot as plt
-from copy import deepcopy, copy
 import math
 from abc import ABC, abstractmethod
+from copy import deepcopy
+
+import matplotlib.pyplot as plt
 import numpy as np
+import torch
 
 from rlll.utils import normalize, StackDataManager
 
@@ -24,7 +24,7 @@ class RandAgent(Agent):
         return math.trunc(self.env.np_random.random() * 4)
 
 
-class DQNAgent:
+class DQNAgent(Agent):
     def __init__(self, env, dnnetwork, buffer, stack_size, epsilon=0.1, eps_decay=0.99, batch_size=32):
 
         self.env = env
@@ -45,13 +45,21 @@ class DQNAgent:
         self.update_loss = []
         self.training_rewards = []
         self.mean_training_rewards = []
+        self.num_steps = []
+        self.best_score = -1000
         self.accu_total_reward = 0
         self.sync_eps = []
         self.total_reward = 0
         self.step_count = 0
+        self.num_step = 0
         self.state0, _ = self.env.reset()
-        self.state0 = normalize(self.state0)
         self.state0 = self.stacker.add(self.state0)
+
+
+    def step(self, obs: np.array) -> int:
+        self.state0 = self.stacker.add(obs)
+        return self.dnnetwork.get_action(self.state0, 0)
+
 
     ## Tomamos una nueva acción
     def take_step(self, eps, mode='train'):
@@ -62,10 +70,15 @@ class DQNAgent:
             # acción a partir del valor de Q (elección de la acción con mejor Q)
             action = self.dnnetwork.get_action(self.state0, eps)
             self.step_count += 1
+            self.num_step += 1
 
         # Realizamos la acción y obtenemos el nuevo estado y la recompensa
-        new_state, reward, done, truncated, info = self.env.step(action)
-        new_state = normalize(new_state)
+        new_state, reward, terminated, truncated, info = self.env.step(action)
+        done = terminated or truncated
+        # if truncated:
+                # reward = -90
+                # print(f"Truncated: {reward}")
+        # reward -= abs(new_state[0]) * 0.1 
         new_state = self.stacker.add(new_state)
         self.total_reward += reward
         self.buffer.append(self.state0, action, reward, done, new_state)  # guardamos experiencia en el buffer
@@ -73,7 +86,7 @@ class DQNAgent:
 
         if done:
             self.state0, info = self.env.reset()
-            self.state0 = normalize(self.state0)
+            self.stacker = StackDataManager(size=self.stack_size)
             self.state0 = self.stacker.add(self.state0)
         return done
 
@@ -95,7 +108,6 @@ class DQNAgent:
         print("Training...")
         while training:
             self.state0, info = self.env.reset()
-            self.state0 = normalize(self.state0)
             self.state0 = self.stacker.add(self.state0)
             self.total_reward = 0
             gamedone = False
@@ -114,19 +126,15 @@ class DQNAgent:
 
                 if gamedone:
                     episode += 1
-                    self.accu_total_reward += self.total_reward
-                    self.training_rewards.append(self.total_reward)  # guardamos las recompensas obtenidas
-                    num_rewards = len(self.training_rewards)
-                    if num_rewards > self.nblock:
-                        self.accu_total_reward -= self.training_rewards[-self.nblock]
                     self.update_loss = []
                     # mean_rewards = np.mean(  # calculamos la media de recompensa de los últimos X episodios
                     #    self.training_rewards[-self.nblock:])
-                    mean_rewards = self.accu_total_reward / min(self.nblock, num_rewards)
-                    self.mean_training_rewards.append(mean_rewards)
-
-                    print("\rEpisode {:d} Mean Rewards {:.2f} Epsilon {}\t\t".format(
-                        episode, mean_rewards, self.epsilon), end="")
+                    mean_rewards = self._update_rewards_history()
+                    if mean_rewards > self.best_score:
+                        self.best_score = mean_rewards
+                    self.num_steps.append(self.num_step)
+                    print("\rEpisode {:d} Mean Rewards {:+8.2f} Best Score {:+8.2f} Epsilon {:5.3f} Steps: {:5d}\t\t".format(
+                        episode, mean_rewards, self.best_score, self.epsilon, self.num_step), end="")
 
                     # Comprobamos que todavía quedan episodios
                     if episode >= max_episodes:
@@ -145,6 +153,17 @@ class DQNAgent:
                     self.epsilon = max(self.epsilon * self.eps_decay, 0.01)
 
                     self.stacker = StackDataManager(size=self.stack_size)
+                    self.num_step = 0
+
+    def _update_rewards_history(self):
+        self.accu_total_reward += self.total_reward
+        self.training_rewards.append(self.total_reward)  # guardamos las recompensas obtenidas
+        num_rewards = len(self.training_rewards)
+        if num_rewards > self.nblock:
+            self.accu_total_reward -= self.training_rewards[-self.nblock]
+        mean_rewards = self.accu_total_reward / min(self.nblock, num_rewards)
+        self.mean_training_rewards.append(mean_rewards)
+        return mean_rewards
 
     ## Cálculo de la pérdida
     def calculate_loss(self, batch):
@@ -199,10 +218,15 @@ class DQNAgent:
 
     def get_rewards_json(self):
         return {
-            'result': [{'step': step, 'reward': value} for step, value in enumerate(self.training_rewards)]
+            'result': [{'episode': episode, 'reward': value} for episode, value in enumerate(self.training_rewards)]
         }
 
     def get_mean_rewards_json(self):
         return {
-            'result': [{'step': step, 'reward': value} for step, value in enumerate(self.mean_training_rewards)]
+            'result': [{'episode': episode, 'reward': value} for episode, value in enumerate(self.mean_training_rewards)]
+        }
+
+    def get_num_steps_json(self):
+        return {
+            'result': [{'episode': episode, 'steps': steps} for episode, steps in enumerate(self.num_steps)]
         }
