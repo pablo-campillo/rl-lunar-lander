@@ -4,6 +4,7 @@ stages:
     deps:
       - src/rlll/train.py
     params:
+    - train.max_epi
     - train.lr
     - train.mem_size
     - train.epsilon
