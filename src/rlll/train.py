@@ -49,7 +49,7 @@ def train_dqn(model_output_path: str):
     with open('eval/train/steps.json', 'w') as f:
         f.write(json.dumps(data))
 
-    data = {'best_score': agent.best_score}
+    data = {'best_score': agent.best_score, 'last_score': agent.mean_training_rewards[-1]}
     with open('eval/train/best_score.json', 'w') as f:
         f.write(json.dumps(data))
 
