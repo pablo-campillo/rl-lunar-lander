@@ -4,11 +4,13 @@ stages:
     deps:
       - src/rlll/train.py
     params:
+    - train.seed
     - train.max_epi
     - train.lr
     - train.mem_size
     - train.epsilon
     - train.epsilon_decay
+    - train.min_epsilon
     - train.gamma
     - train.batch_size
     - train.burn_in

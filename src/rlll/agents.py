@@ -1,6 +1,7 @@
 import math
 from abc import ABC, abstractmethod
-from copy import deepcopy
+from copy import deepcopy, copy
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,8 +26,9 @@ class RandAgent(Agent):
 
 
 class DQNAgent(Agent):
-    def __init__(self, env, dnnetwork, buffer, stack_size, epsilon=0.1, eps_decay=0.99, batch_size=32):
-
+    def __init__(self, env, dnnetwork, buffer, stack_size, epsilon=0.1, eps_decay=0.99, min_epsilon=0.01, batch_size=32,
+                 seed=0):
+        self.seed = seed
         self.env = env
         self.dnnetwork = dnnetwork
         self.target_network = deepcopy(dnnetwork)  # red objetivo (copia de la principal)
@@ -35,6 +37,7 @@ class DQNAgent(Agent):
         self.stacker = StackDataManager(size=stack_size)
         self.epsilon = epsilon
         self.eps_decay = eps_decay
+        self.min_epsilon = min_epsilon
         self.batch_size = batch_size
         self.nblock = 100  # bloque de los X últimos episodios de los que se calculará la media de recompensa
         self.reward_threshold = self.env.spec.reward_threshold  # recompensa media a partir de la cual se considera
@@ -46,13 +49,15 @@ class DQNAgent(Agent):
         self.training_rewards = []
         self.mean_training_rewards = []
         self.num_steps = []
+        self.best_model = None
         self.best_score = -1000
         self.accu_total_reward = 0
         self.sync_eps = []
         self.total_reward = 0
         self.step_count = 0
         self.num_step = 0
-        self.state0, _ = self.env.reset()
+        self.seed += 1
+        self.state0, _ = self.env.reset(seed=self.seed)
         self.state0 = self.stacker.add(self.state0)
 
 
@@ -65,7 +70,7 @@ class DQNAgent(Agent):
     def take_step(self, eps, mode='train'):
         if mode == 'explore':
             # acción aleatoria en el burn-in y en la fase de exploración (epsilon)
-            action = self.env.action_space.sample()
+            action = self.env.np_random.choice([0, 1, 2, 3])
         else:
             # acción a partir del valor de Q (elección de la acción con mejor Q)
             action = self.dnnetwork.get_action(self.state0, eps)
@@ -75,17 +80,14 @@ class DQNAgent(Agent):
         # Realizamos la acción y obtenemos el nuevo estado y la recompensa
         new_state, reward, terminated, truncated, info = self.env.step(action)
         done = terminated or truncated
-        # if truncated:
-                # reward = -90
-                # print(f"Truncated: {reward}")
-        # reward -= abs(new_state[0]) * 0.1 
         new_state = self.stacker.add(new_state)
         self.total_reward += reward
         self.buffer.append(self.state0, action, reward, done, new_state)  # guardamos experiencia en el buffer
         self.state0 = new_state.copy()
 
         if done:
-            self.state0, info = self.env.reset()
+            self.seed += 1
+            self.state0, info = self.env.reset(seed=self.seed)
             self.stacker = StackDataManager(size=self.stack_size)
             self.state0 = self.stacker.add(self.state0)
         return done
@@ -107,7 +109,8 @@ class DQNAgent(Agent):
         training = True
         print("Training...")
         while training:
-            self.state0, info = self.env.reset()
+            self.seed += 1
+            self.state0, info = self.env.reset(seed=self.seed)
             self.state0 = self.stacker.add(self.state0)
             self.total_reward = 0
             gamedone = False
@@ -132,6 +135,7 @@ class DQNAgent(Agent):
                     mean_rewards = self._update_rewards_history()
                     if mean_rewards > self.best_score:
                         self.best_score = mean_rewards
+                        self.best_model = self.dnnetwork.state_dict()
                     self.num_steps.append(self.num_step)
                     print("\rEpisode {:d} Mean Rewards {:+8.2f} Best Score {:+8.2f} Epsilon {:5.3f} Steps: {:5d}\t\t".format(
                         episode, mean_rewards, self.best_score, self.epsilon, self.num_step), end="")
@@ -150,7 +154,7 @@ class DQNAgent(Agent):
                         break
 
                     # Actualizamos epsilon según la velocidad de decaimiento fijada
-                    self.epsilon = max(self.epsilon * self.eps_decay, 0.01)
+                    self.epsilon = max(self.epsilon * self.eps_decay, self.min_epsilon)
 
                     self.stacker = StackDataManager(size=self.stack_size)
                     self.num_step = 0
@@ -200,10 +204,13 @@ class DQNAgent(Agent):
         else:
             self.update_loss.append(loss.detach().numpy())
 
-    def save(self, file_path: str):
+    def save(self, file_path: Path):
         torch.save(self.dnnetwork.state_dict(), file_path)
 
-    def load(self, file_path: str):
+    def save_best(self, file_path: Path):
+        torch.save(self.best_model, file_path.with_name('best-'+file_path.name))
+
+    def load(self, file_path: Path):
         self.dnnetwork.load_state_dict(torch.load(file_path))
 
     def plot_rewards(self):

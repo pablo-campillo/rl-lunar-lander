@@ -6,6 +6,7 @@ import torch.nn as tnn
 class DQN(tnn.Module):
     def __init__(self, env, input_size, hidden_size=16, learning_rate=1e-3, device='cpu'):
         super(DQN, self).__init__()
+        self.env = env
         self.device = device
         self.n_inputs = input_size
         self.n_outputs = env.action_space.n
@@ -29,8 +30,8 @@ class DQN(tnn.Module):
 
     ### Método e-greedy
     def get_action(self, state, epsilon=0.05):
-        if np.random.random() < epsilon:
-            action = np.random.choice(self.actions)  # acción aleatoria
+        if self.env.np_random.random() < epsilon:
+            action = self.env.np_random.choice(self.actions)  # acción aleatoria
         else:
             qvals = self.get_qvals(state)  # acción a partir del cálculo del valor de Q para esa acción
             action = torch.max(qvals, dim=-1)[1].item()
