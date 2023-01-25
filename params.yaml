@@ -1,5 +1,5 @@
 train:
-  seed: 43
+  seed: 10000
   max_epi: 2000
   lr: 0.0032
   mem_size: 100000

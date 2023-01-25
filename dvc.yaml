@@ -30,6 +30,16 @@ stages:
     metrics:
       - eval/train/best_score.json:
           cache: false
+  evaluate:
+    cmd: PYTHONPATH=src python src/rlll/evaluate.py models/best-model.pkl
+    deps:
+      - src/rlll/evaluate.py
+      - models/best-model.pkl
+    outs:
+      - eval/test/mean_rewards.json:
+          cache: false
+      - eval/test/steps.json:
+          cache: false
 
 plots:
   - Training-Rewards:

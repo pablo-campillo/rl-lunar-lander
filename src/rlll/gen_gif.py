@@ -39,7 +39,7 @@ def gen_gif():
     hidden_size = params['hidden_size']
 
     env = gym.make('LunarLander-v2', render_mode='rgb_array')
-    buffer = ExperienceReplayBuffer(memory_size=mem_size, burn_in=burn_in)
+    buffer = ExperienceReplayBuffer(env, memory_size=mem_size, burn_in=burn_in)
     dqn = DQN(env, 8*stack_size, hidden_size=hidden_size, learning_rate=lr, device='cuda')
     agent = DQNAgent(env, dqn, buffer, stack_size, epsilon, epsilon_decay, batch_size)
     agent.load('models/model.pkl')
