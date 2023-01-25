@@ -37,7 +37,15 @@ plots:
       y:
         eval/train/rewards.json: reward
         eval/train/mean_rewards.json: reward
-  - Number-Steps:
+  - Training-Num-Steps:
       x: episode
       y:
         eval/train/steps.json: steps
+  - Test-Mean-Training-Rewards:
+      x: episode
+      y:
+        eval/test/mean_rewards.json: reward
+  - Test-Number-Steps:
+      x: episode
+      y:
+        eval/test/steps.json: steps
