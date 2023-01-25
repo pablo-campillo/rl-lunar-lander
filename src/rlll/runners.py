@@ -31,7 +31,6 @@ class EnvRunManager:
 
     def __call__(self, *args, **kwargs):
         action = self.agent.step(self.current_state)
-        print(f"action: {action}")
         self.current_state, reward, terminated, truncated, info = self.env.step(action)
         self._notify_listeners(self.current_state, reward, terminated, truncated, info)
         return terminated, truncated

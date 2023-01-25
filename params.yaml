@@ -1,15 +1,15 @@
 train:
   seed: 43
   max_epi: 2000
-  lr: 0.001
-  mem_size: 100000
+  lr: 0.0042
+  mem_size: 10000
   burn_in: 1000
-  epsilon: 1
-  epsilon_decay: 0.99
-  min_epsilon: 0.01
-  gamma: 0.99
-  batch_size: 32
-  dnn_update: 1
-  dnn_sync: 2500
+  epsilon: 0.5
+  epsilon_decay: 0.957
+  min_epsilon: 0.014
+  gamma: 0.989
+  batch_size: 8
+  dnn_update: 4
+  dnn_sync: 1000
   stack_size: 1
-  hidden_size: 16
+  hidden_size: 32
