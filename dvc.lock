@@ -4,38 +4,38 @@ stages:
     cmd: PYTHONPATH=src python src/rlll/train.py models
     deps:
     - path: src/rlll/train.py
-      md5: ab21bc7b2bdd0a4a5bd7e7939c7c710b
-      size: 4057
+      md5: 4f7a1449be266b2a23b9c3ab0b4ce0ff
+      size: 4097
     params:
       params.yaml:
-        train.batch_size: 32
+        train.batch_size: 64
         train.burn_in: 1000
         train.dnn_sync: 2500
-        train.dnn_update: 1
-        train.epsilon: 1
-        train.epsilon_decay: 0.99
-        train.gamma: 0.99
-        train.hidden_size: 16
-        train.lr: 0.001
-        train.max_epi: 10
+        train.dnn_update: 2
+        train.epsilon: 0.9
+        train.epsilon_decay: 0.972
+        train.gamma: 0.988
+        train.hidden_size: 32
+        train.lr: 0.0032
+        train.max_epi: 2000
         train.mem_size: 100000
-        train.min_epsilon: 0.01
+        train.min_epsilon: 0.012
         train.seed: 43
-        train.stack_size: 1
+        train.stack_size: 2
     outs:
     - path: eval/train/best_score.json
-      md5: f6e80c4015d11e0461e7de534f39a635
-      size: 70
+      md5: 0d89e05625d429b490c7d53b71eba3be
+      size: 68
     - path: eval/train/mean_rewards.json
-      md5: e7b466335b4ef0b6dcdd14963fa74da6
-      size: 481
+      md5: 3a4981f718bda5a344dc0b37353f5322
+      size: 33802
     - path: eval/train/rewards.json
-      md5: c6eb2822e62cb0daa7487793f0c99572
-      size: 471
+      md5: 4f4f3cd2f3c0295d05d9a4e748663ac5
+      size: 33877
     - path: eval/train/steps.json
-      md5: 80e84fd32f1990a9d2c0e9d287afb322
-      size: 305
+      md5: 0dd99cd86391c651126f06f3f60d9673
+      size: 22696
     - path: models
-      md5: 7e208bda5028fb919784a6599d689937.dir
-      size: 7726
+      md5: 31d204cf29d63b642b2da41d878130cc.dir
+      size: 17710
       nfiles: 2
